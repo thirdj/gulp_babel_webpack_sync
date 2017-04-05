@@ -56,9 +56,26 @@ gulp.task('clean', () => {
   return del.sync([DIR.DEST]);
 });
 
+gulp.task('watch', () => {
+  let watcher = {
+    js: gulp.watch(SRC.JS, ['js']),
+    css: gulp.watch(SRC.CSS, ['css']),
+    html: gulp.watch(SRC.HTML, ['html']),
+    images: gulp.watch(SRC.IMAGES, ['images'])
+  };
 
-gulp.task('default', ['clean', 'js', 'css', 'html', 'images'], () => {
-  return gulpUtil.log('Gulp is running');
+  let notify = (event) => {
+    gulpUtil.log('File', gulpUtil.colors.yellow(event.path), 'was', gulpUtil.colors.magenta(event.type));
+  };
+
+  for(let key in watcher) {
+    watcher[key].on('change', notify);
+  }
+
+});
+
+gulp.task('default', ['clean', 'js', 'css', 'html', 'images', 'watch'], () => {
+  gulpUtil.log('Gulp is running');
 });
 /**
  * gulp.task(name [, deps, fn]) 는 gulp가 처리할 task, 즉 ‘작업‘ 을 정의합니다.
