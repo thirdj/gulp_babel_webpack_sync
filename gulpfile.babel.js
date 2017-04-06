@@ -2,13 +2,16 @@
 
 import gulp from 'gulp';
 import gulpUtil from 'gulp-util';
-import uglify from 'gulp-uglify';
+// import uglify from 'gulp-uglify';
 import cleanCSS from 'gulp-clean-css';
 import htmlmin from 'gulp-htmlmin';
 import imagemin from 'gulp-imagemin';
 import babel from 'gulp-babel';
 import Cache from 'gulp-file-cache';
 import nodemon from 'gulp-nodemon';
+import webpack from 'gulp-webpack';
+import webpackConfig from './webpack.config';
+
 import del from 'del';
 
 const DIR = {
@@ -31,13 +34,13 @@ const DEST = {
   IMAGES: DIR.DEST + '/images',
   SERVER: 'app'
 }
-
+/*
 gulp.task('js', () => {
   return gulp.src(SRC.JS)
     .pipe(uglify())
     .pipe(gulp.dest(DEST.JS));
 });
-
+*/
 gulp.task('css', () => {
   return gulp.src(SRC.CSS)
     .pipe(cleanCSS({ compatibility: 'ie8' }))
@@ -80,9 +83,15 @@ gulp.task('start', ['babel'], () => {
   });
 })
 
+gulp.task('webpack', () => {
+  return gulp.src('assets/js/main.js')
+    .pipe(webpack(webpackConfig))
+    .pipe(gulp.dest('dist/js'));
+});
+
 gulp.task('watch', () => {
   let watcher = {
-    js: gulp.watch(SRC.JS, ['js']),
+    webpack: gulp.watch(SRC.JS, ['webpack']),
     css: gulp.watch(SRC.CSS, ['css']),
     html: gulp.watch(SRC.HTML, ['html']),
     images: gulp.watch(SRC.IMAGES, ['images']),
@@ -99,7 +108,7 @@ gulp.task('watch', () => {
 
 });
 
-gulp.task('default', ['clean', 'js', 'css', 'html', 'images', 'watch', 'start'], () => {
+gulp.task('default', ['clean', 'webpack', 'css', 'html', 'images', 'watch', 'start'], () => {
   gulpUtil.log('Gulp is running');
 });
 /**
