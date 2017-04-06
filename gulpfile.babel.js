@@ -2,11 +2,13 @@
 
 import gulp from 'gulp';
 import gulpUtil from 'gulp-util';
-
 import uglify from 'gulp-uglify';
 import cleanCSS from 'gulp-clean-css';
 import htmlmin from 'gulp-htmlmin';
 import imagemin from 'gulp-imagemin';
+import babel from 'gulp-babel';
+import Cache from 'gulp-file-cache';
+import nodemon from 'gulp-nodemon';
 import del from 'del';
 
 const DIR = {
@@ -18,14 +20,16 @@ const SRC = {
   JS: DIR.SRC + '/js/*.js',
   CSS: DIR.SRC + '/css/*.css',
   HTML: DIR.SRC + '/*.html',
-  IMAGES: DIR.SRC + '/images/*'
+  IMAGES: DIR.SRC + '/images/*',
+  SERVER: 'server/**/*.js'
 }
 
 const DEST = {
   JS: DIR.DEST + '/js',
   CSS: DIR.DEST + '/css',
   HTML: DIR.DEST + '/',
-  IMAGES: DIR.DEST + '/images'
+  IMAGES: DIR.DEST + '/images',
+  SERVER: 'app'
 }
 
 gulp.task('js', () => {
@@ -56,12 +60,33 @@ gulp.task('clean', () => {
   return del.sync([DIR.DEST]);
 });
 
+// 변경된 파일만 컴파일 하도록 해 줌.
+let cache = new Cache();
+
+gulp.task('babel', () => {
+  return gulp.src(SRC.SERVER)
+    .pipe(cache.filter())
+    .pipe(babel({
+      presets: ['es2015']
+    }))
+    .pipe(cache.cache())
+    .pipe(gulp.dest(DEST.SERVER));
+});
+
+gulp.task('start', ['babel'], () => {
+  return nodemon({
+    script: DEST.SERVER + '/main.js',
+    watch: DEST.SERVER
+  });
+})
+
 gulp.task('watch', () => {
   let watcher = {
     js: gulp.watch(SRC.JS, ['js']),
     css: gulp.watch(SRC.CSS, ['css']),
     html: gulp.watch(SRC.HTML, ['html']),
-    images: gulp.watch(SRC.IMAGES, ['images'])
+    images: gulp.watch(SRC.IMAGES, ['images']),
+    babel: gulp.watch(SRC.SERVER, ['babel'])
   };
 
   let notify = (event) => {
@@ -74,7 +99,7 @@ gulp.task('watch', () => {
 
 });
 
-gulp.task('default', ['clean', 'js', 'css', 'html', 'images', 'watch'], () => {
+gulp.task('default', ['clean', 'js', 'css', 'html', 'images', 'watch', 'start'], () => {
   gulpUtil.log('Gulp is running');
 });
 /**

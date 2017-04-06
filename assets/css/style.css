@@ -29,7 +29,7 @@ body, input, textarea, select, button, table {
 }
 a { text-decoration: none; color: #547fbb; }
 a:visited { text-decoration: none; }
-.hidden { display: none; }
+.hidden { display: none; font-size: 15px; }
 
 /* Icons */
 .material-icons {
