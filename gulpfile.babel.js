@@ -10,6 +10,7 @@ import babel from 'gulp-babel';
 import Cache from 'gulp-file-cache';
 import nodemon from 'gulp-nodemon';
 import webpack from 'gulp-webpack';
+import browserSync from 'browser-sync';
 import webpackConfig from './webpack.config';
 
 import del from 'del';
@@ -89,6 +90,14 @@ gulp.task('webpack', () => {
     .pipe(gulp.dest('dist/js'));
 });
 
+gulp.task('browser-sync', () => {
+  browserSync.init(null, {
+    proxy: 'http://localhost:9090',
+    files: ['dist/**/*.*'],
+    port: 7000
+  })
+});
+
 gulp.task('watch', () => {
   let watcher = {
     webpack: gulp.watch(SRC.JS, ['webpack']),
@@ -108,7 +117,9 @@ gulp.task('watch', () => {
 
 });
 
-gulp.task('default', ['clean', 'webpack', 'css', 'html', 'images', 'watch', 'start'], () => {
+gulp.task('default',
+  ['clean', 'webpack', 'css', 'html', 'images', 'watch', 'start', 'browser-sync'],
+  () => {
   gulpUtil.log('Gulp is running');
 });
 /**
